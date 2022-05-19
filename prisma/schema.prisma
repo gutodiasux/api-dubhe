@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(uuid())
+  fullname      String
+  email         String
+  password      String
+  createdAt     DateTime        @default(now())
+  userProfile   UserProfile?
+  sellerReviews SellerReviews[]
+}
+
+model UserProfile {
+  id         String @id @default(uuid())
+  street     String
+  number     String
+  complement String
+  city       String
+  state      String
+  zipcode    String
+
+  userHealthProfile UserHealthProfile?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model UserHealthProfile {
+  id                   String                @id @default(uuid())
+  bloodType            String
+  alergic              Boolean               @default(false)
+  userAlergicMedicines UserAlergicMedicines?
+  userHealthIssues     UserHealthIssues?
+
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId String      @unique
+}
+
+model UserAlergicMedicines {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  userHealthProfile   UserHealthProfile @relation(fields: [userHealthProfileId], references: [id])
+  userHealthProfileId String            @unique
+}
+
+model UserHealthIssues {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+
+  userHealthProfile   UserHealthProfile @relation(fields: [userHealthProfileId], references: [id])
+  userHealthProfileId String            @unique
+}
+
+model Seller {
+  id            String         @id @default(uuid())
+  name          String
+  email         String
+  password      String
+  createdAt     DateTime       @default(now())
+  sellerProfile SellerProfile?
+}
+
+model SellerProfile {
+  id            String          @id @default(uuid())
+  street        String
+  number        String
+  complement    String
+  city          String
+  state         String
+  zipcode       String
+  locationMark  String
+  sellerReviews SellerReviews[]
+  seller        Seller          @relation(fields: [sellerId], references: [id])
+  sellerId      String          @unique
+}
+
+model SellerReviews {
+  id              String        @id @default(uuid())
+  rate            Int
+  description     String?
+  recommend       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  sellerProfile   SellerProfile @relation(fields: [sellerProfileId], references: [id])
+  sellerProfileId String        @unique
+  user            User          @relation(fields: [userId], references: [id])
+  userId          String        @unique
+}
+
+model SellerProducts {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Decimal
+  createdAt   DateTime @default(now())
+}
